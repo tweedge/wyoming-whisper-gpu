@@ -17,7 +17,7 @@ RUN \
         nvidia-cuda-toolkit
 
 RUN \
-    pip install --upgrade --no-cache-dir pip \
+    pip3 install --upgrade --no-cache-dir pip \
     && pip3 install --no-cache-dir -U \
         setuptools \
         wheel \
