@@ -1,8 +1,5 @@
-Wyoming Whisper docker container with NVIDIA GPU support for Home-Assistant
+Well, whoops. This `wyoming-whisper-gpu` repository does not actually put `wyoming-faster-whisper` on the GPU. It runs on CPU - note no calls to `cuda()` in Torch: https://github.com/rhasspy/wyoming-faster-whisper/blob/main/wyoming_faster_whisper/transformers_whisper.py
 
-Docker: https://hub.docker.com/r/confusedengineer/wyoming-whisper-gpu
+It is a decent Dockerfile otherwise and does boot a Wyoming STT endpoint which uses `faster-whisper` on the backend.
 
-To Download: 
-docker pull confusedengineer/wyoming-whisper-gpu:latest
-
-For Command Arguments Visit: https://github.com/home-assistant/addons/blob/master/whisper/DOCS.md
+I might eventually do up a copy of `wyoming-faster-whisper` with GPU acceleration, but we'll see.
