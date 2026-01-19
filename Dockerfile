@@ -8,7 +8,10 @@ RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
+        libavdevice-dev \
+        libavfilter-dev \
         libavformat-dev \
+        libswscale-dev \
         pkg-config \
         python3 \
         python3-dev \
