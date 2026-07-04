@@ -21,26 +21,32 @@ The image is based on `nvidia/cuda:12.6.3-cudnn-runtime-ubuntu22.04` (arm64 comp
 ## Run
 
 ```bash
-docker run --runtime nvidia -d \
-    -p 10300:10300 \
-    -v /path/to/model/cache:/data \
-    --name wyoming-whisper-gpu \
+sudo docker run -d \
+    --runtime=nvidia \
+    --network host \
+    -v $HOME/.cache/faster-whisper:/data \
+    -e MODEL='tiny' \
+    -e LANGUAGE='en' \
+    -e COMPUTE_TYPE='int8' \
+    -e BEAM_SIZE=5 \
+    --name wyoming-whisper-tiny-en \
     wyoming-whisper-gpu
 ```
 
-The container defaults to `--model tiny-int8 --device cuda`. Models are downloaded to `/data` on first run, so mount a persistent volume there.
+`--network host` exposes port 10300 directly on the host — convenient for Home Assistant on the same machine or LAN. Models are downloaded to `~/.cache/faster-whisper` on first run.
 
-To override the model or pass additional arguments, append them after the image name:
+### Environment variables
 
-```bash
-docker run --runtime nvidia -d \
-    -p 10300:10300 \
-    -v /path/to/model/cache:/data \
-    wyoming-whisper-gpu \
-    --model small-int8 --language en
-```
+| Variable | Default | Description |
+|---|---|---|
+| `MODEL` | `tiny-int8` | Whisper model name (see below) |
+| `LANGUAGE` | _(auto-detect)_ | Language code, e.g. `en`, `de`, `fr` |
+| `COMPUTE_TYPE` | `default` | CTranslate2 compute type: `int8`, `float16`, `default` |
+| `BEAM_SIZE` | `0` (auto) | Beam search width; auto selects 1 on ARM, 5 on x86 |
 
 Available models: `tiny-int8`, `tiny`, `base-int8`, `base`, `small-int8`, `small`, `medium-int8`, `medium`, `large-v1`, `large-v2`, `large-v3`, and any HuggingFace model ID (e.g. `Systran/faster-distil-whisper-small.en`).
+
+Additional CLI flags can be appended after the image name and will be passed through to `wyoming_faster_whisper` directly.
 
 ## Home Assistant / Wyoming Protocol
 
