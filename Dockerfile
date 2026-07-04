@@ -49,7 +49,8 @@ RUN apt-get update \
         pybind11-dev \
         # OpenBLAS replaces Intel MKL (MKL is x86-only)
         libopenblas-dev \
-        libomp-dev \
+        # libgomp1 provides libgomp.so.1 (GNU OpenMP, used by -DOPENMP_RUNTIME=COMP)
+        libgomp1 \
         # cuDNN for CUDA 12 (required by CTranslate2's cuDNN backend)
         libcudnn9-dev-cuda-12 \
     && rm -rf /var/lib/apt/lists/*
@@ -113,7 +114,8 @@ RUN apt-get update \
         python3-venv \
         # OpenBLAS runtime (required by ctranslate2 built with OpenBLAS)
         libopenblas0 \
-        libomp5 \
+        # libgomp1 provides libgomp.so.1 (GNU OpenMP, linked by ctranslate2 via -DOPENMP_RUNTIME=COMP)
+        libgomp1 \
         # cuDNN runtime for CUDA 12
         libcudnn9-cuda-12 \
     && rm -rf /var/lib/apt/lists/*
