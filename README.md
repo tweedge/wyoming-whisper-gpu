@@ -16,7 +16,11 @@ GPU acceleration is provided by [faster-whisper](https://github.com/SYSTRAN/fast
 docker build -t wyoming-whisper-gpu .
 ```
 
-The image is based on `nvidia/cuda:12.6.3-cudnn-runtime-ubuntu22.04` (arm64 compatible), which provides the cuBLAS and cuDNN 9 libraries required by CTranslate2 for GPU inference.
+**The build takes 20–40 minutes** on a Jetson Orin Nano — it compiles [CTranslate2](https://github.com/OpenNMT/CTranslate2) from source with CUDA support. This is unavoidable: the PyPI `aarch64` wheels for `ctranslate2` are CPU-only and will produce `ValueError: This CTranslate2 package was not compiled with CUDA support` at runtime.
+
+The build uses two stages:
+- **Stage 1** (`nvcr.io/nvidia/12.6.11-devel`): compiles CTranslate2 v4.5.0 from source against CUDA 12.6, cuDNN 9, and OpenBLAS (SM87 / Orin architecture). Produces a CUDA-enabled Python wheel.
+- **Stage 2** (`nvcr.io/nvidia/l4t-cuda:12.6.11-runtime`): installs `wyoming-faster-whisper`, then replaces the CPU-only `ctranslate2` pip dependency with the wheel from Stage 1.
 
 ## Run
 
@@ -55,5 +59,7 @@ This image exposes a [Wyoming protocol](https://github.com/rhasspy/wyoming) STT 
 ## Notes
 
 - The NVIDIA Container Runtime passes the host CUDA driver into the container; the image does not bundle its own driver.
-- cuBLAS and cuDNN 9 come from the `nvidia/cuda:12.6.3-cudnn-runtime-ubuntu22.04` base image.
-- `--device cuda` and `--compute-type int8` (implied by `tiny-int8`) are suitable for the Orin Nano's integrated GPU memory constraints.
+- cuDNN 9 is installed from NVIDIA's Jetson apt repo (`repo.download.nvidia.com/jetson`); it is not bundled in the L4T base images.
+- CTranslate2 is compiled for **SM87** (Orin Nano / Orin NX / AGX Orin). For Xavier (SM72), rebuild with `--build-arg CUDA_ARCH=72`.
+- `--device cuda` and `--compute-type int8` are appropriate for the Orin Nano's shared GPU memory constraints.
+- Standard `nvidia/cuda` Docker Hub images are **x86-only** for CUDA support; Jetson requires L4T (`nvcr.io/nvidia/l4t-*`) images.
