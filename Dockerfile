@@ -142,7 +142,7 @@ RUN python3 -m venv .venv \
 ENV LD_LIBRARY_PATH="/opt/ctranslate2/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}"
 
 WORKDIR /
-COPY run.sh ./
+COPY run.sh warmup.py ./
 
 EXPOSE 10300
 
