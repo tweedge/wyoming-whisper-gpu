@@ -52,6 +52,32 @@ Available models: `tiny-int8`, `tiny`, `base-int8`, `base`, `small-int8`, `small
 
 Additional CLI flags can be appended after the image name and will be passed through to `wyoming_faster_whisper` directly.
 
+## Startup and warmup
+
+On first run (or when the model isn't cached), the container downloads the model from HuggingFace before the server starts. On subsequent starts the model loads from `/data`.
+
+After the server is ready, `run.sh` automatically runs two real transcription requests using 1 second of synthetic silence. This forces CUDA kernel JIT compilation and ensures the model is fully resident in GPU memory before the first real client request arrives. Without warmup, the first real request bears the full JIT cost; with it, that cost is paid at startup instead.
+
+Example startup log:
+
+```
+[run.sh] Waiting for Wyoming server to be ready on port 10300...
+INFO:httpx:HTTP Request: GET https://huggingface.co/.../faster-whisper-tiny/revision/main "HTTP/1.1 200 OK"
+INFO:__main__:Ready
+[run.sh] Server is ready. Running warmup...
+[warmup] Connecting to Wyoming server at 127.0.0.1:10300
+INFO:faster_whisper:Processing audio with duration 00:01.000
+INFO:faster_whisper:Detected language 'en' with probability 0.29
+[warmup] Run 1/2: 18268 ms  transcript=(empty — expected for silence)
+INFO:faster_whisper:Processing audio with duration 00:01.000
+INFO:faster_whisper:Detected language 'en' with probability 0.29
+[warmup] Run 2/2: 491 ms  transcript=(empty — expected for silence)
+[warmup] Done — model is warm and ready.
+[run.sh] Warmup complete. Wyoming faster-whisper is ready for requests.
+```
+
+Run 1 is slow (18 s here) due to CUDA JIT compilation. Run 2 shows the steady-state latency (~491 ms) that subsequent real requests will see.
+
 ## Home Assistant / Wyoming Protocol
 
 This image exposes a [Wyoming protocol](https://github.com/rhasspy/wyoming) STT endpoint on port **10300**, compatible with the Home Assistant Wyoming integration.
