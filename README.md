@@ -52,6 +52,11 @@ Available models: `tiny-int8`, `tiny`, `base-int8`, `base`, `small-int8`, `small
 
 Additional CLI flags can be appended after the image name and will be passed through to `wyoming_faster_whisper` directly.
 
+## Home Assistant / Wyoming Protocol
+
+This image exposes a [Wyoming protocol](https://github.com/rhasspy/wyoming) STT endpoint on port **10300**, compatible with the Home Assistant Wyoming integration.
+
+
 ## Startup and warmup
 
 On first run (or when the model isn't cached), the container downloads the model from HuggingFace before the server starts. On subsequent starts the model loads from `/data`.
@@ -76,11 +81,7 @@ INFO:faster_whisper:Detected language 'en' with probability 0.29
 [run.sh] Warmup complete. Wyoming faster-whisper is ready for requests.
 ```
 
-Run 1 is slow (18 s here) due to CUDA JIT compilation. Run 2 shows the steady-state latency (~491 ms) that subsequent real requests will see.
-
-## Home Assistant / Wyoming Protocol
-
-This image exposes a [Wyoming protocol](https://github.com/rhasspy/wyoming) STT endpoint on port **10300**, compatible with the Home Assistant Wyoming integration.
+Run 1 is slow (18s here) due to CUDA JIT compilation. Run 2 shows the much lower steady-state latency that subsequent real requests will see.
 
 ## Notes
 
